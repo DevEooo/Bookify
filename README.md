@@ -1,11 +1,34 @@
+# 🏨 Hotel Reservation App
 
-  # Hotel Reservation Landing Page
+A modern and responsive **Hotel Reservation App** built with **TypeScript**, **React**, and **Tailwind CSS**, using **Firebase** for backend services such as authentication, database, and storage.
 
-  This is a code bundle for Hotel Reservation Landing Page. The original project is available at https://www.figma.com/design/MTtC3rVviGyemnxyeX8dKp/Hotel-Reservation-Landing-Page.
+---
 
-  ## Running the code
+## ✨ Features
 
-  Run `npm i` to install the dependencies.
+- 🏠 **Browse Hotels** – View available hotels with details, images, and pricing.
+- 📅 **Book Rooms** – Make reservations in real time using Firebase.
+- 👤 **User Authentication** – Secure login and signup powered by Firebase Auth.
+- 💾 **Cloud Storage** – Store images and hotel data with Firebase Storage and Firestore.
+- 🧭 **Dashboard Views** – Separate access for users and admins.
+- 🌙 **Responsive Design** – Fully responsive with Tailwind for smooth cross-device experience.
+- ⚡ **Real-time Updates** – Syncs instantly with Firebase when new bookings or updates occur.
 
-  Run `npm run dev` to start the development server.
-  
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technology |
+|-----------|-------------|
+| **Frontend** | React (TypeScript), Tailwind CSS |
+| **Backend** | Firebase (Firestore, Auth, Realtime Database) |
+| **Tools** | Vite, ESLint, Prettier |
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/<your-username>/hotel-reservation-app.git
+cd hotel-reservation-app
