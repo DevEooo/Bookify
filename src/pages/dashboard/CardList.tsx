@@ -74,7 +74,7 @@ export function BookingCard({
             <>
               <button 
                 onClick={onViewDetails}
-                className="flex-1 bg-[#3b82f6] text-white py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                className="flex-1 bg-[#3b82f6] text-white py-2 rounded-lg hover:bg-blue-600 transition-colors text-center"
               >
                 Lihat Detail
               </button>
@@ -92,7 +92,7 @@ export function BookingCard({
             <>
               <button 
                 onClick={onViewDetails}
-                className="flex-1 bg-gray-700 text-[#e5e7eb] py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                className="flex-1 bg-gray-700 text-[#e5e7eb] py-2 rounded-lg hover:bg-gray-600 transition-colors text-center"
               >
                 Lihat Detail
               </button>

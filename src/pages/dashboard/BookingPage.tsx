@@ -1,5 +1,5 @@
 import { ShoppingCart } from "lucide-react";
-import { CartItemCard } from "./Item";
+import { CartItemCard } from "./CardView";
 
 interface MyBookingsViewProps {
   cartItems: any[];

@@ -2,11 +2,13 @@ import { useState } from "react";
 import { TopNavbar } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { DashboardView } from "./DashboardView";
+import { SearchHotelsView } from "./SearchPage";
 import { MyBookingsView } from "./BookingPage";
-import { BookingDetailsModal } from "./Detail";
-import { Calendar, Heart, CreditCard, Clock } from "lucide-react";
+import { BookingDetailsModal } from "./DetailModal";
+import { Calendar, Heart, CreditCard, Clock, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "../../components/ui/sonner";
+import { useAuth } from "../../../function/config/AuthConfig";
 import "../../styles/dashboard.css";
 import "../../dashboardView.css"
 
@@ -24,11 +26,13 @@ interface CartItem {
 }
 
 export default function App() {
+  const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeView, setActiveView] = useState("dashboard");
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const username = user?.displayName || user?.email || "User";
 
   const stats = [
     { icon: Calendar, label: "Total Pemesanan", value: 12, color: "bg-blue-500/20 text-blue-400" },
@@ -159,6 +163,14 @@ export default function App() {
             onWishlist={handleWishlist}
           />
         );
+      case "search":
+        return (
+          <SearchHotelsView
+            onViewDetails={handleViewDetails}
+            onBook={handleAddToCart}
+            onWishlist={handleWishlist}
+          />
+        );
       case "bookings":
         return (
           <MyBookingsView
@@ -184,6 +196,14 @@ export default function App() {
             <p className="text-gray-400">Fitur ini akan segera hadir</p>
           </div>
         );
+      case "settings":
+        return (
+          <div className="text-center py-12">
+            <Settings className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+            <h2 className="text-[#e5e7eb] mb-2">Pengaturan</h2>
+            <p className="text-gray-400">Fitur ini akan segera hadir</p>
+          </div>
+        );
       default:
         return null;
     }
@@ -202,7 +222,7 @@ export default function App() {
           },
         }}
       />
-      <TopNavbar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
+      <TopNavbar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} activeView={activeView} username={username} />
       <Sidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

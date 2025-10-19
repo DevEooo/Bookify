@@ -4,7 +4,7 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Separator } from "../../components/ui/separator";
 import { useState } from "react";
-import { Mail, Lock, User, Loader2 } from "lucide-react";
+import { Mail, Lock, User, Loader2, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../../../function/config/AuthConfig";
 import { useNavigate } from "react-router-dom";
 
@@ -20,6 +20,7 @@ export default function AuthModal({ terbuka, onTutup }: AuthModalProps) {
   const [nama, setNama] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,8 +36,13 @@ export default function AuthModal({ terbuka, onTutup }: AuthModalProps) {
         onTutup();
         navigate('/dashboard');
       }
-    } catch (err) {
-      // Error is handled by the context
+    } catch (err: any) {
+      if (err.code === 'auth/user-not-found') {
+        setModeDaftar(true);
+        clearError();
+      } else {
+        // Error is handled by the context
+      }
     }
   };
 
@@ -75,7 +81,7 @@ export default function AuthModal({ terbuka, onTutup }: AuthModalProps) {
       <DialogContent className="sm:max-w-md bg-card border-border">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl text-card-foreground">
-            {modeDaftar ? "Daftar Akun Baru" : "Masuk ke StayEasy"}
+            {modeDaftar ? "Daftar Akun Baru" : "Masuk ke Bookify"}
           </DialogTitle>
         </DialogHeader>
 
@@ -198,27 +204,22 @@ export default function AuthModal({ terbuka, onTutup }: AuthModalProps) {
                 <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Masukkan password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 bg-input-background border-border text-card-foreground placeholder:text-muted-foreground"
+                  className="pl-10 pr-10 bg-input-background border-border text-card-foreground placeholder:text-muted-foreground"
                   required
                 />
-              </div>
-            </div>
-
-            {/* Forgot Password (hanya untuk mode login) */}
-            {!modeDaftar && (
-              <div className="text-right">
                 <button
                   type="button"
-                  className="text-sm text-primary hover:underline"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-card-foreground"
                 >
-                  Lupa password?
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-            )}
+            </div>
 
             {/* Submit Button */}
             <Button

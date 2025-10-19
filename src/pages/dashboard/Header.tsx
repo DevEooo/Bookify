@@ -1,19 +1,32 @@
 import { Search, User, LogOut } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../../../function/config/AuthConfig";
+import { useNavigate } from "react-router-dom";
 
 interface TopNavbarProps {
   onMenuToggle: () => void;
+  activeView: string;
+  username: string;
 }
 
-export function TopNavbar({ onMenuToggle }: TopNavbarProps) {
-  const [showDropdown, setShowDropdown] = useState(false);
+export function TopNavbar({ onMenuToggle, activeView, username }: TopNavbarProps) {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <nav className="fixed top-0 right-0 left-0 lg:left-64 z-50 bg-[#0f1117] border-b border-gray-700 shadow-lg h-20">
       <div className="flex items-center justify-between px-4 h-full">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-1">
           <button
             onClick={onMenuToggle}
             className="lg:hidden p-2 hover:bg-[#1a1c23] rounded-lg transition-colors"
@@ -22,21 +35,12 @@ export function TopNavbar({ onMenuToggle }: TopNavbarProps) {
             <div className="w-6 h-0.5 bg-gray-400 mb-1.5"></div>
             <div className="w-6 h-0.5 bg-gray-400"></div>
           </button>
-
-          <div className="flex items-center gap-3 bg-[#1a1c23] rounded-lg px-3 py-2 w-64 md:w-80 lg:w-96">
-            <Search className="w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Cari hotel, destinasi…"
-              className="bg-transparent border-none outline-none text-[#e5e7eb] placeholder-gray-500 flex-1"
-            />
-          </div>
         </div>
 
         <div className="flex items-center gap-6">
-          <div className="hidden md:block text-right">
-            <p className="text-[#e5e7eb]">Selamat datang kembali,</p>
-            <p className="text-[#3b82f6]">{user?.displayName || user?.email || 'User'}</p>
+          <div className="text-right">
+            <p className="text-[#e5e7eb]">Selamat datang,</p>
+            <p className="text-[#3b82f6]">{username}</p>
           </div>
 
           <div className="relative">
@@ -50,11 +54,11 @@ export function TopNavbar({ onMenuToggle }: TopNavbarProps) {
             {showDropdown && (
               <div className="absolute right-0 mt-2 w-64 bg-[#1a1c23] rounded-lg shadow-xl border border-gray-700 overflow-hidden">
                 <div className="p-4 border-b border-gray-700">
-                  <p className="text-[#e5e7eb]">{user?.displayName || 'User'}</p>
+                  <p className="text-[#e5e7eb]">{user?.displayName || "User"}</p>
                   <p className="text-gray-400 text-sm">{user?.email}</p>
                 </div>
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="w-full px-4 py-3 text-left text-[#e5e7eb] hover:bg-[#0f1117] transition-colors flex items-center gap-2"
                 >
                   <LogOut className="w-4 h-4" />
