@@ -1,6 +1,6 @@
 import { Banner } from "./Banner";
-import { StatCard } from "./Stats";
-import { BookingCard } from "./CardList";
+import { StatCard } from "./StatCard";
+import { BookingCard } from "./BookingCard";
 import { Calendar, Heart, CreditCard, Clock } from "lucide-react";
 
 interface DashboardViewProps {
@@ -9,7 +9,7 @@ interface DashboardViewProps {
   pastBookings: any[];
   onViewDetails: (booking: any) => void;
   onBook: (booking: any) => void;
-  onWishlist: (hotelName: string) => void;
+  onWishlist: (hotel: any) => void;
 }
 
 export function DashboardView({
@@ -55,10 +55,15 @@ export function DashboardView({
           {upcomingBookings.map((booking, index) => (
             <BookingCard
               key={index}
-              {...booking}
+              hotelName={booking.hotelName}
+              city={booking.city}
+              image={booking.image}
+              checkIn={booking.checkIn}
+              checkOut={booking.checkOut}
+              price={booking.price}
               onViewDetails={() => onViewDetails(booking)}
               onBook={() => onBook(booking)}
-              onWishlist={() => onWishlist(booking.hotelName)}
+              onWishlist={() => onWishlist(booking)}
             />
           ))}
         </div>
@@ -76,7 +81,12 @@ export function DashboardView({
           {pastBookings.map((booking, index) => (
             <BookingCard
               key={index}
-              {...booking}
+              hotelName={booking.hotelName}
+              city={booking.city}
+              image={booking.image}
+              checkIn={booking.checkIn}
+              checkOut={booking.checkOut}
+              price={booking.price}
               status="past"
               onViewDetails={() => onViewDetails(booking)}
               onBook={() => onBook(booking)}

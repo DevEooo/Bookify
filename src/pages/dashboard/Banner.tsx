@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { ImageWithFallback } from "../../components/fallback/ImageWithFallback";
+import { ImageWithFallback } from "../../components/fallback/ImageWithFallback";;
 
 const bannerSlides = [
   {
@@ -57,7 +57,7 @@ export function Banner() {
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30"></div>
-
+          
           <div className="absolute inset-0 flex flex-col justify-center px-8">
             <h3 className="text-white text-4xl mb-2">{slide.title}</h3>
             <p className="text-gray-200 text-lg mb-4">{slide.description}</p>

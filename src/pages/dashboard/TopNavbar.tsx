@@ -1,25 +1,21 @@
 import { Search, User, LogOut } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../../../function/config/AuthConfig";
-import { useNavigate } from "react-router-dom";
 
 interface TopNavbarProps {
   onMenuToggle: () => void;
-  activeView: string;
-  username: string;
 }
 
-export function TopNavbar({ onMenuToggle, activeView, username }: TopNavbarProps) {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+export function TopNavbar({ onMenuToggle }: TopNavbarProps) {
   const [showDropdown, setShowDropdown] = useState(false);
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     try {
       await logout();
-      navigate("/");
+      setShowDropdown(false);
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error("Logout error:", error);
     }
   };
 
@@ -39,8 +35,8 @@ export function TopNavbar({ onMenuToggle, activeView, username }: TopNavbarProps
 
         <div className="flex items-center gap-6">
           <div className="text-right">
-            <p className="text-[#e5e7eb]">Selamat datang,</p>
-            <p className="text-[#3b82f6]">{username}</p>
+            <p className="text-[#e5e7eb] text-medium md:text-base">Selamat datang,</p>
+            <p className="text-[#3b82f6] font-medium text-sm md:text-base">{user?.displayName || user?.email?.split('@')[0] || 'User'}</p>
           </div>
 
           <div className="relative">
@@ -54,7 +50,7 @@ export function TopNavbar({ onMenuToggle, activeView, username }: TopNavbarProps
             {showDropdown && (
               <div className="absolute right-0 mt-2 w-64 bg-[#1a1c23] rounded-lg shadow-xl border border-gray-700 overflow-hidden">
                 <div className="p-4 border-b border-gray-700">
-                  <p className="text-[#e5e7eb]">{user?.displayName || "User"}</p>
+                  <p className="text-[#e5e7eb]">{user?.displayName || 'User'}</p>
                   <p className="text-gray-400 text-sm">{user?.email}</p>
                 </div>
                 <button

@@ -1,7 +1,5 @@
-import { Home, Calendar, Heart, LogOut, Search } from "lucide-react";
+import { Home, Search, Calendar, Heart, CreditCard, Settings, LogOut, History } from "lucide-react";
 import { useState } from "react";
-import { useAuth } from "../../../function/config/AuthConfig";
-import { useNavigate } from "react-router-dom";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -11,28 +9,18 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onClose, activeView, onViewChange }: SidebarProps) {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
-
   const menuItems = [
     { id: "dashboard", icon: Home, label: "Beranda" },
     { id: "search", icon: Search, label: "Cari Hotel" },
     { id: "bookings", icon: Calendar, label: "Pemesanan Saya" },
-    { id: "wishlist", icon: Heart, label: "Favorit" }
+    { id: "history", icon: History, label: "Riwayat" },
+    { id: "wishlist", icon: Heart, label: "Favorit" },
+    { id: "payments", icon: CreditCard, label: "Pembayaran" },
   ];
 
   const handleItemClick = (id: string) => {
     onViewChange(id);
     onClose(); // Close sidebar on mobile after selection
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
   };
 
   return (
@@ -77,10 +65,7 @@ export function Sidebar({ isOpen, onClose, activeView, onViewChange }: SidebarPr
           })}
 
           <div className="pt-3 mt-3 border-t border-gray-700">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-[#1a1c23] hover:text-[#e5e7eb] transition-all"
-            >
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-[#1a1c23] hover:text-[#e5e7eb] transition-all">
               <LogOut className="w-5 h-5" />
               <span>Keluar</span>
             </button>
