@@ -1,11 +1,11 @@
 import { Search, MapPin, Star, Users, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
 import { BookingCard } from "./BookingCard";
-import { fetchHotels, type Hotel } from "../../../function/config/firestoreUtils";
+import { fetchHotels, type Hotel } from "../../../function/utilities/firestoreUtils";
 
 interface SearchHotelsViewProps {
   onViewDetails: (hotel: any) => void;
-  onBook: (hotel: any) => void;
+  onBook: (booking: any) => void;
   onWishlist: (hotel: any) => void;
 }
 
@@ -54,6 +54,21 @@ export function SearchHotelsView({ onViewDetails, onBook, onWishlist }: SearchHo
 
     return matchesSearch && matchesDestination;
   });
+
+  const handleBook = (hotel: Hotel) => {
+    onBook({
+      hotelName: hotel.nama,
+      city: hotel.lokasi,
+      image: hotel.gambar,
+      checkIn: "",
+      checkOut: "",
+      price: `Rp ${hotel.harga_per_malam.toLocaleString('id-ID')}`,
+      guests: 1,
+      nights: 1,
+      rating: parseFloat(hotel.rating),
+      roomType: "Standard Room",
+    });
+  };
 
   if (loading) {
     return (
@@ -124,7 +139,7 @@ export function SearchHotelsView({ onViewDetails, onBook, onWishlist }: SearchHo
               checkOut=""
               price={`Rp ${hotel.harga_per_malam.toLocaleString('id-ID')}`}
               onViewDetails={() => onViewDetails(hotel)}
-              onBook={() => onBook(hotel)}
+              onBook={() => handleBook(hotel)}
               onWishlist={() => onWishlist(hotel)}
             />
           ))}

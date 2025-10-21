@@ -4,8 +4,8 @@ import { Card, CardContent } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { ImageWithFallback } from "../../components/fallback/ImageWithFallback";
 import { Star, MapPin } from "lucide-react";
-import { fetchHotels } from "../../../function/config/firestoreUtils";
-import type { Hotel } from "../../../function/config/firestoreUtils";
+import { fetchHotels } from "../../../function/utilities/firestoreUtils";
+import type { Hotel } from "../../../function/utilities/firestoreUtils";
 
 export default function FeaturedHotels() {
   const [hotels, setHotels] = useState<Hotel[]>([]);

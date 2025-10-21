@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Heart, MapPin, Star, Trash2 } from "lucide-react";
-import { fetchFavorites, removeFromFavorites, type Favorite } from "../../../function/config/firestoreUtils";
+import { fetchFavorites, removeFromFavorites, type Favorite } from "../../../function/utilities/firestoreUtils";
 import { useAuth } from "../../../function/config/AuthConfig";
 import { ImageWithFallback } from "../../components/fallback/ImageWithFallback";
 import { toast } from "sonner";

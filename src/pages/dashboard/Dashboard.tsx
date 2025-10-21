@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { fetchHotels, fetchStats, fetchFavorites, addToFavorites, removeFromFavorites, isFavorite, addToHistory, fetchHistory, type Hotel, type Stats, type Favorite } from "../../../function/config/firestoreUtils";
+import { fetchHotels, fetchStats, fetchFavorites, addToFavorites, removeFromFavorites, isFavorite, addToHistory, fetchHistory, fetchPaymentMethods, addPaymentMethod, updatePaymentMethod, deletePaymentMethod, setDefaultPaymentMethod, fetchCartItems, removeFromCart, updateCartItem, clearCart, type Hotel, type Stats, type Favorite, type PaymentMethod as FirestorePaymentMethod, type CartItem as FirestoreCartItem } from "../../../function/utilities/firestoreUtils";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../../../function/config/FirebaseConfig";
 import type { User } from 'firebase/auth';
 import { useAuth } from "../../../function/config/AuthConfig";
 import { TopNavbar } from "./TopNavbar";
@@ -82,16 +84,45 @@ export default function App() {
         setHotels(sortedHotels);
         setStatsData(fetchedStats);
 
-        // Load favorites and history if user is logged in
+        // Load user data if logged in
         if (user) {
-          const [userFavorites, userHistory] = await Promise.all([
+          const [userFavorites, userHistory, userPaymentMethods, userCartItems] = await Promise.all([
             fetchFavorites(user.uid),
-            fetchHistory(user.uid)
+            fetchHistory(user.uid),
+            fetchPaymentMethods(user.uid),
+            fetchCartItems(user.uid)
           ]);
           setFavorites(userFavorites);
           setHistoryItems(userHistory.map(item => ({
             ...item,
             totalPaid: `Rp ${item.totalPaid.toLocaleString('id-ID')}`
+          })));
+          setPaymentMethods(userPaymentMethods.map(method => ({
+            id: method.id,
+            type: method.type,
+            isDefault: method.isDefault,
+            cardNumber: method.cardNumber,
+            cardExpiry: method.cardExpiry,
+            cardName: method.cardName,
+            eWalletType: method.eWalletType,
+            phoneNumber: method.phoneNumber,
+            bankName: method.bankName,
+          })));
+          setCartItems(userCartItems.map(item => ({
+            id: item.id,
+            hotelName: item.hotelName,
+            city: item.city,
+            image: item.image,
+            checkIn: item.checkIn,
+            checkOut: item.checkOut,
+            price: item.price,
+            rating: item.rating,
+            guests: item.guests,
+            nights: item.nights,
+            totalPrice: item.totalPrice,
+            roomType: item.roomType,
+            checkInDate: item.checkInDate ? new Date(item.checkInDate) : undefined,
+            checkOutDate: item.checkOutDate ? new Date(item.checkOutDate) : undefined,
           })));
         }
       } catch (error) {
@@ -195,27 +226,83 @@ export default function App() {
     }
   };
 
-  const handleAddToCart = (booking: any) => {
+  const handleAddToCart = async (booking: any) => {
+    if (!user) {
+      toast.error("Please login to add to cart");
+      return;
+    }
+
+    // Handle both hotel objects (from SearchHotelsView) and booking objects (from DashboardView)
+    const isHotelObject = booking.nama !== undefined;
+    const hotelName = isHotelObject ? booking.nama : booking.hotelName;
+    const city = isHotelObject ? booking.lokasi : booking.city;
+    const image = isHotelObject ? booking.gambar : booking.image;
+    const price = isHotelObject ? `Rp ${booking.harga_per_malam.toLocaleString('id-ID')}` : booking.price;
+    const rating = isHotelObject ? parseFloat(booking.rating) : booking.rating;
+
     // Check if item already exists in cart
-    const existingItem = cartItems.find(item => item.hotelName === booking.hotelName);
+    const existingItem = cartItems.find(item => item.hotelName === hotelName);
 
     if (existingItem) {
-      toast.info(`${booking.hotelName} sudah ada di Pemesanan Saya`, {
+      toast.info(`${hotelName} sudah ada di Pemesanan Saya`, {
         duration: 2000,
       });
     } else {
-      const cartItem: CartItem = {
-        id: `cart-${Date.now()}`,
-        ...booking,
+      const guests = booking.guests || 1;
+      const nights = booking.nights || 1;
+      const pricePerNight = parseInt(price.replace(/[^0-9]/g, ''));
+      const totalPrice = pricePerNight * guests * nights;
+
+      const cartItem: Omit<FirestoreCartItem, 'id' | 'userId'> = {
+        hotelName,
+        city,
+        image,
+        checkIn: booking.checkIn || "",
+        checkOut: booking.checkOut || "",
+        price,
+        rating,
+        guests,
+        nights,
+        totalPrice: `Rp ${totalPrice.toLocaleString('id-ID')}`,
+        roomType: booking.roomType || "Standard Room",
+        checkInDate: booking.checkInDate,
+        checkOutDate: booking.checkOutDate,
       };
 
-      setCartItems([...cartItems, cartItem]);
-      setActiveView("bookings");
+      try {
+        await addDoc(collection(db, "Cart"), {
+          userId: user.uid,
+          ...cartItem,
+          createdAt: new Date(),
+        });
+        // Reload cart items from Firestore
+        const updatedCartItems = await fetchCartItems(user.uid);
+        setCartItems(updatedCartItems.map(item => ({
+          id: item.id,
+          hotelName: item.hotelName,
+          city: item.city,
+          image: item.image,
+          checkIn: item.checkIn,
+          checkOut: item.checkOut,
+          price: item.price,
+          rating: item.rating,
+          guests: item.guests,
+          nights: item.nights,
+          totalPrice: item.totalPrice,
+          roomType: item.roomType,
+          checkInDate: item.checkInDate ? new Date(item.checkInDate) : undefined,
+          checkOutDate: item.checkOutDate ? new Date(item.checkOutDate) : undefined,
+        })));
+        setActiveView("bookings");
 
-      toast.success(`${booking.hotelName} ditambahkan ke Pemesanan Saya!`, {
-        description: "Silakan lanjutkan untuk memesan",
-        duration: 3000,
-      });
+        toast.success(`${hotelName} ditambahkan ke Pemesanan Saya!`, {
+          description: "Silakan lanjutkan untuk memesan",
+          duration: 3000,
+        });
+      } catch (error) {
+        console.error("Error adding to cart:", error);
+        toast.error("Failed to add to cart");
+      }
     }
   };
 
@@ -306,50 +393,116 @@ export default function App() {
     setActiveView("history");
   };
 
-  const handleRemoveFromCart = (id: string) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
-    toast.success("Item dihapus dari Pemesanan Saya", {
-      duration: 2000,
-    });
+  const handleRemoveFromCart = async (id: string) => {
+    if (!user) {
+      toast.error("Please login to remove from cart");
+      return;
+    }
+
+    try {
+      await removeFromCart(user.uid, id);
+      setCartItems(cartItems.filter(item => item.id !== id));
+      toast.success("Item dihapus dari Pemesanan Saya", {
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error("Error removing from cart:", error);
+      toast.error("Failed to remove from cart");
+    }
   };
 
-  const handleUpdateCartItem = (id: string, updates: Partial<CartItem>) => {
-    setCartItems(cartItems.map(item =>
-      item.id === id ? { ...item, ...updates } : item
-    ));
+  const handleUpdateCartItem = async (id: string, updates: Partial<CartItem>) => {
+    if (!user) {
+      toast.error("Please login to update cart");
+      return;
+    }
+
+    try {
+      await updateCartItem(user.uid, id, updates);
+      setCartItems(cartItems.map(item =>
+        item.id === id ? { ...item, ...updates } : item
+      ));
+    } catch (error) {
+      console.error("Error updating cart item:", error);
+      toast.error("Failed to update cart item");
+    }
   };
 
-  const handleAddPaymentMethod = (method: PaymentMethod) => {
-    setPaymentMethods([...paymentMethods, method]);
-    toast.success("Metode pembayaran berhasil ditambahkan", {
-      duration: 2000,
-    });
+  const handleAddPaymentMethod = async (method: PaymentMethod) => {
+    if (!user) {
+      toast.error("Please login to add payment method");
+      return;
+    }
+
+    try {
+      await addPaymentMethod(user.uid, method);
+      setPaymentMethods([...paymentMethods, method]);
+      toast.success("Metode pembayaran berhasil ditambahkan", {
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error("Error adding payment method:", error);
+      toast.error("Failed to add payment method");
+    }
   };
 
-  const handleUpdatePaymentMethod = (id: string, updatedMethod: PaymentMethod) => {
-    setPaymentMethods(paymentMethods.map(method =>
-      method.id === id ? updatedMethod : method
-    ));
-    toast.success("Metode pembayaran berhasil diperbarui", {
-      duration: 2000,
-    });
+  const handleUpdatePaymentMethod = async (id: string, updatedMethod: PaymentMethod) => {
+    if (!user) {
+      toast.error("Please login to update payment method");
+      return;
+    }
+
+    try {
+      await updatePaymentMethod(user.uid, id, updatedMethod);
+      setPaymentMethods(paymentMethods.map(method =>
+        method.id === id ? updatedMethod : method
+      ));
+      toast.success("Metode pembayaran berhasil diperbarui", {
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error("Error updating payment method:", error);
+      toast.error("Failed to update payment method");
+    }
   };
 
-  const handleDeletePaymentMethod = (id: string) => {
-    setPaymentMethods(paymentMethods.filter(method => method.id !== id));
-    toast.success("Metode pembayaran berhasil dihapus", {
-      duration: 2000,
-    });
+  const handleDeletePaymentMethod = async (id: string) => {
+    if (!user) {
+      toast.error("Please login to delete payment method");
+      return;
+    }
+
+    try {
+      await deletePaymentMethod(user.uid, id);
+      setPaymentMethods(paymentMethods.filter(method => method.id !== id));
+      toast.success("Metode pembayaran berhasil dihapus", {
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error("Error deleting payment method:", error);
+      toast.error("Failed to delete payment method");
+    }
   };
 
-  const handleSetDefaultPaymentMethod = (id: string) => {
-    setPaymentMethods(paymentMethods.map(method => ({
-      ...method,
-      isDefault: method.id === id,
-    })));
-    toast.success("Metode pembayaran default berhasil diubah", {
-      duration: 2000,
-    });
+  const handleSetDefaultPaymentMethod = async (id: string) => {
+    if (!user) {
+      toast.error("Please login to set default payment method");
+      return;
+    }
+
+    try {
+      await setDefaultPaymentMethod(user.uid, id);
+      setPaymentMethods(paymentMethods.map(method => ({
+        ...method,
+        isDefault: method.id === id,
+      })));
+      toast.success("Metode pembayaran default berhasil diubah", {
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error("Error setting default payment method:", error);
+      toast.error("Failed to set default payment method");
+    }
   };
 
   const renderView = () => {

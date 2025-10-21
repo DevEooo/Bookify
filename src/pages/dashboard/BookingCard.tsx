@@ -10,7 +10,7 @@ interface BookingCardProps {
   status?: "upcoming" | "past";
   price?: string;
   onViewDetails?: () => void;
-  onBook?: () => void;
+  onBook?: (booking: any) => void;
   onWishlist?: () => void;
 }
 
@@ -26,6 +26,23 @@ export function BookingCard({
   onBook,
   onWishlist,
 }: BookingCardProps) {
+  const handleBook = () => {
+    if (onBook) {
+      onBook({
+        hotelName,
+        city,
+        image,
+        checkIn,
+        checkOut,
+        price,
+        guests: 1,
+        nights: 1,
+        rating: 0,
+        roomType: "Standard Room",
+      });
+    }
+  };
+
   return (
     <div className="bg-[#1a1c23] rounded-xl overflow-hidden border border-gray-700 hover:border-[#3b82f6] transition-all hover:shadow-lg hover:shadow-blue-500/10 group">
       <div className="relative h-48 overflow-hidden">
@@ -51,7 +68,7 @@ export function BookingCard({
 
       <div className="p-4">
         <h3 className="text-[#e5e7eb] mb-2">{hotelName}</h3>
-        
+
         <div className="flex items-center gap-2 text-gray-400 text-sm mb-1.5">
           <MapPin className="w-4 h-4" />
           <span>{city}</span>
@@ -72,15 +89,15 @@ export function BookingCard({
         <div className="flex gap-2">
           {status === "upcoming" ? (
             <>
-              <button 
+              <button
                 onClick={onViewDetails}
                 className="flex-1 bg-[#3b82f6] text-white py-2 rounded-lg hover:bg-blue-600 transition-colors text-center"
               >
                 Lihat Detail
               </button>
               {onBook && (
-                <button 
-                  onClick={onBook}
+                <button
+                  onClick={handleBook}
                   className="bg-gray-700 text-[#e5e7eb] p-2 rounded-lg hover:bg-gray-600 transition-colors"
                   title="Pesan Lagi"
                 >
@@ -90,15 +107,15 @@ export function BookingCard({
             </>
           ) : (
             <>
-              <button 
+              <button
                 onClick={onViewDetails}
                 className="flex-1 bg-gray-700 text-[#e5e7eb] py-2 rounded-lg hover:bg-gray-600 transition-colors text-center"
               >
                 Lihat Detail
               </button>
               {onBook && (
-                <button 
-                  onClick={onBook}
+                <button
+                  onClick={handleBook}
                   className="bg-[#3b82f6] text-white p-2 rounded-lg hover:bg-blue-600 transition-colors"
                   title="Pesan Lagi"
                 >
