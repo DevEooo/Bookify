@@ -5,14 +5,11 @@ interface PaymentMethod {
   id: string;
   type: "credit-card" | "e-wallet" | "bank-transfer";
   isDefault: boolean;
-  // Credit card fields
   cardNumber?: string;
   cardExpiry?: string;
   cardName?: string;
-  // E-wallet fields
   eWalletType?: string;
   phoneNumber?: string;
-  // Bank transfer fields
   bankName?: string;
 }
 

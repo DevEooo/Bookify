@@ -4,17 +4,17 @@ import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../../function/config/FirebaseConfig";
 import type { User } from 'firebase/auth';
 import { useAuth } from "../../../function/config/AuthConfig";
-import { TopNavbar } from "./TopNavbar";
+import { TopNavbar } from "./Header";
 import { Sidebar } from "./Sidebar";
-import { DashboardView } from "./DashboardView";
-import { SearchHotelsView } from "./SearchHotelsView";
-import { MyBookingsView } from "./MyBookingsView";
-import { PaymentMethodsView } from "./PaymentMethodsView";
-import { CheckoutView } from "./CheckoutView";
-import { HistoryView } from "./HistoryView";
-import { FavoritesView } from "./FavoritesView";
-import { BookingDetailsModal } from "./BookingDetailsModal";
-import { PaymentSuccessModal } from "./PaymentSuccessModal";
+import { DashboardView } from "./DashboardVPage";
+import { SearchHotelsView } from "./SearchPage";
+import { MyBookingsView } from "./BookingPage";
+import { PaymentMethodsView } from "./PaymentPage";
+import { CheckoutView } from "./Checkout";
+import { HistoryView } from "./HistoryPage";
+import { FavoritesView } from "./FavPage";
+import { BookingDetailsModal } from "./BookingModal";
+import { PaymentSuccessModal } from "./PaymentSuccess";
 import { Calendar, Heart, CreditCard, Clock, Settings, History as HistoryIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "../../components/ui/sonner";
@@ -136,16 +136,20 @@ export default function App() {
     loadData();
   }, [user]);
 
-  const stats = statsData ? [
-    { icon: Calendar, label: "Total Pemesanan", value: statsData.totalBookings, color: "bg-blue-500/20 text-blue-400" },
-    { icon: HistoryIcon, label: "History Pemesanan", value: statsData.upcomingTrips, color: "bg-green-500/20 text-green-400" },
+  // Calculate stats from local data
+  const totalBookings = cartItems.length;
+  const historyBookings = historyItems.length;
+  const totalSpent = historyItems.reduce((sum, item) => {
+    const amount = parseInt((item.totalPaid || '').replace(/[^0-9]/g, ''));
+    return sum + amount;
+  }, 0);
+  const formattedTotalSpent = totalSpent > 0 ? `Rp ${totalSpent.toLocaleString('id-ID')}` : 'Rp 0';
+
+  const stats = [
+    { icon: Calendar, label: "Total Pemesanan", value: totalBookings, color: "bg-blue-500/20 text-blue-400" },
+    { icon: HistoryIcon, label: "History Pemesanan", value: historyBookings, color: "bg-green-500/20 text-green-400" },
     { icon: Heart, label: "Hotel Favorit", value: favorites.length, color: "bg-pink-500/20 text-pink-400" },
-    { icon: CreditCard, label: "Total Pengeluaran", value: statsData.totalSpent, color: "bg-purple-500/20 text-purple-400" },
-  ] : [
-    { icon: Calendar, label: "Total Pemesanan", value: 0, color: "bg-blue-500/20 text-blue-400" },
-    { icon: HistoryIcon, label: "History Pemesanan", value: 0, color: "bg-green-500/20 text-green-400" },
-    { icon: Heart, label: "Hotel Favorit", value: favorites.length, color: "bg-pink-500/20 text-pink-400" },
-    { icon: CreditCard, label: "Total Pengeluaran", value: 0, color: "bg-purple-500/20 text-purple-400" },
+    { icon: CreditCard, label: "Total Pengeluaran", value: formattedTotalSpent, color: "bg-purple-500/20 text-purple-400" },
   ];
 
   // Get 3 random hotels for recommendations
@@ -256,12 +260,7 @@ export default function App() {
     }
   };
 
-  const handleAddToCart = async (booking: any) => {
-    if (!user) {
-      toast.error("Please login to add to cart");
-      return;
-    }
-
+  const handleAddToCart = (booking: any) => {
     // Handle both hotel objects (from SearchHotelsView) and booking objects (from DashboardView)
     const isHotelObject = booking.nama !== undefined;
     const hotelName = isHotelObject ? booking.nama : booking.hotelName;
@@ -283,7 +282,8 @@ export default function App() {
       const pricePerNight = parseInt(price.replace(/[^0-9]/g, ''));
       const totalPrice = pricePerNight * guests * nights;
 
-      const cartItem: Omit<FirestoreCartItem, 'id' | 'userId'> = {
+      const cartItem: CartItem = {
+        id: `cart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         hotelName,
         city,
         image,
@@ -299,40 +299,13 @@ export default function App() {
         checkOutDate: booking.checkOutDate,
       };
 
-      try {
-        await addDoc(collection(db, "Cart"), {
-          userId: user.uid,
-          ...cartItem,
-          createdAt: new Date(),
-        });
-        // Reload cart items from Firestore
-        const updatedCartItems = await fetchCartItems(user.uid);
-        setCartItems(updatedCartItems.map(item => ({
-          id: item.id,
-          hotelName: item.hotelName,
-          city: item.city,
-          image: item.image,
-          checkIn: item.checkIn,
-          checkOut: item.checkOut,
-          price: item.price,
-          rating: item.rating,
-          guests: item.guests,
-          nights: item.nights,
-          totalPrice: item.totalPrice,
-          roomType: item.roomType,
-          checkInDate: item.checkInDate ? new Date(item.checkInDate) : undefined,
-          checkOutDate: item.checkOutDate ? new Date(item.checkOutDate) : undefined,
-        })));
-        setActiveView("bookings");
+      setCartItems([...cartItems, cartItem]);
+      setActiveView("bookings");
 
-        toast.success(`${hotelName} ditambahkan ke Pemesanan Saya!`, {
-          description: "Silakan lanjutkan untuk memesan",
-          duration: 3000,
-        });
-      } catch (error) {
-        console.error("Error adding to cart:", error);
-        toast.error("Failed to add to cart");
-      }
+      toast.success(`${hotelName} ditambahkan ke Pemesanan Saya!`, {
+        description: "Silakan lanjutkan untuk memesan",
+        duration: 3000,
+      });
     }
   };
 

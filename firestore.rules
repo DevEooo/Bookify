@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+  
+    // Hanya Authorized User yang bisa lihat (Read) dan edit (Write) ltem favorit
+    match /Favorites/{document} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // Hanya Authorized User yang bisa lihat (Read) dan edit (Write) data payment
+    match /PaymentMethods/{document} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // Izin untuk membaca swmua item hotel, jadi semua orang bisa liat. tapi cuma Authorized user yang bisa write
+    match /Hotel/{document} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Izin untuk membaca statistik, jadi semua orang bisa liat. tapi cuma Authorized user yang bisa write
+    match /Stats/{document} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}

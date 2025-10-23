@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ShoppingCart } from "lucide-react";
-import { CartItemCard } from "./CartItemCard";
-import { CartItemDetailsModal } from "./CartItemDetailsModal";
+import { CartItemCard } from "./Item";
+import { CartItemDetailsModal } from "./DetailModal";
 
 interface CartItem {
   id: string;

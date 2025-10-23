@@ -1,6 +1,6 @@
 import { Banner } from "./Banner";
-import { StatCard } from "./StatCard";
-import { BookingCard } from "./BookingCard";
+import { StatCard } from "./Stats";
+import { BookingCard } from "./BookingList";
 import { Calendar, Heart, CreditCard, Clock } from "lucide-react";
 
 interface DashboardViewProps {

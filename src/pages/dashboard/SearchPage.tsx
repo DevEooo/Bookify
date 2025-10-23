@@ -1,6 +1,6 @@
 import { Search, MapPin, Star, Users, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
-import { BookingCard } from "./BookingCard";
+import { BookingCard } from "./BookingList";
 import { fetchHotels, type Hotel } from "../../../function/utilities/firestoreUtils";
 
 interface SearchHotelsViewProps {
