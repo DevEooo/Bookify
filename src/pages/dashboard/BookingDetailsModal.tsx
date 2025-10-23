@@ -1,4 +1,4 @@
-import { X, MapPin, Calendar, Users, Star } from "lucide-react";
+import { X, MapPin, Star } from "lucide-react";
 import { ImageWithFallback } from "../../components/fallback/ImageWithFallback";
 
 interface BookingDetailsModalProps {
@@ -14,10 +14,12 @@ interface BookingDetailsModalProps {
     rating?: number;
     guests?: number;
     roomType?: string;
+    description?: string;
   } | null;
+  onManageBooking?: (booking: any) => void;
 }
 
-export function BookingDetailsModal({ isOpen, onClose, booking }: BookingDetailsModalProps) {
+export function BookingDetailsModal({ isOpen, onClose, booking, onManageBooking }: BookingDetailsModalProps) {
   if (!isOpen || !booking) return null;
 
   return (
@@ -61,45 +63,10 @@ export function BookingDetailsModal({ isOpen, onClose, booking }: BookingDetails
             {booking.rating && (
               <div className="flex items-center gap-1 bg-[#3b82f6] px-3 py-1 rounded-lg">
                 <Star className="w-4 h-4 text-white fill-white" />
-                <span className="text-white">{booking.rating}</span>
+                <span className="text-white">{booking.rating.toFixed(1)}</span>
               </div>
             )}
           </div>
-
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="bg-[#0f1117] rounded-lg p-3 border border-gray-700">
-              <div className="flex items-center gap-2 text-gray-400 mb-1">
-                <Calendar className="w-4 h-4" />
-                <span className="text-sm">Check-in</span>
-              </div>
-              <p className="text-[#e5e7eb]">{booking.checkIn}</p>
-            </div>
-
-            <div className="bg-[#0f1117] rounded-lg p-3 border border-gray-700">
-              <div className="flex items-center gap-2 text-gray-400 mb-1">
-                <Calendar className="w-4 h-4" />
-                <span className="text-sm">Check-out</span>
-              </div>
-              <p className="text-[#e5e7eb]">{booking.checkOut}</p>
-            </div>
-          </div>
-
-          {(booking.roomType || booking.guests) && (
-            <div className="mb-4 space-y-2">
-              {booking.roomType && (
-                <div className="flex items-center justify-between text-gray-400">
-                  <span>Tipe Kamar</span>
-                  <span className="text-[#e5e7eb]">{booking.roomType}</span>
-                </div>
-              )}
-              {booking.guests && (
-                <div className="flex items-center justify-between text-gray-400">
-                  <Users className="w-4 h-4" />
-                  <span className="text-[#e5e7eb]">{booking.guests} Tamu</span>
-                </div>
-              )}
-            </div>
-          )}
 
           {booking.price && (
             <div className="flex items-center justify-between mb-4 p-3 bg-[#0f1117] rounded-lg border border-gray-700">
@@ -108,11 +75,25 @@ export function BookingDetailsModal({ isOpen, onClose, booking }: BookingDetails
             </div>
           )}
 
+          {booking.description && (
+            <div className="mb-4 p-4 bg-[#0f1117] rounded-lg border border-gray-700">
+              <h3 className="text-[#e5e7eb] mb-2">Deskripsi</h3>
+              <p className="text-gray-400 leading-relaxed">{booking.description}</p>
+            </div>
+          )}
+
           <div className="flex gap-2">
-            <button className="flex-1 bg-[#3b82f6] text-white py-2.5 rounded-lg hover:bg-blue-600 transition-colors">
+            <button
+              onClick={() => {
+                if (onManageBooking) {
+                  onManageBooking(booking);
+                }
+              }}
+              className="flex-1 bg-[#3b82f6] text-white py-2.5 rounded-lg hover:bg-blue-600 transition-colors"
+            >
               Kelola Pemesanan
             </button>
-            <button 
+            <button
               onClick={onClose}
               className="px-5 bg-gray-700 text-[#e5e7eb] py-2.5 rounded-lg hover:bg-gray-600 transition-colors"
             >

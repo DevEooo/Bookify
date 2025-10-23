@@ -148,34 +148,64 @@ export default function App() {
     { icon: CreditCard, label: "Total Pengeluaran", value: 0, color: "bg-purple-500/20 text-purple-400" },
   ];
 
-  // Get top 3 hotels for upcoming bookings display
-  const upcomingBookings = hotels.slice(0, 3).map(hotel => ({
-    hotelName: hotel.nama,
-    city: hotel.lokasi,
-    image: hotel.gambar,
-    checkIn: "15 Des 2025",
-    checkOut: "20 Des 2025",
-    price: `Rp ${hotel.harga_per_malam.toLocaleString('id-ID')}`,
-    rating: parseFloat(hotel.rating),
-    guests: 2,
-    roomType: "Deluxe Room",
-  }));
+  // Get 3 random hotels for recommendations
+  const getRandomHotels = (hotels: Hotel[], count: number) => {
+    const shuffled = [...hotels].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
 
-  // Get next 2 hotels for past bookings display
-  const pastBookings = hotels.slice(3, 5).map(hotel => ({
+  const recommendations = getRandomHotels(hotels, 3).map(hotel => ({
     hotelName: hotel.nama,
     city: hotel.lokasi,
     image: hotel.gambar,
-    checkIn: "10 Sep 2025",
-    checkOut: "15 Sep 2025",
+    checkIn: "",
+    checkOut: "",
     price: `Rp ${hotel.harga_per_malam.toLocaleString('id-ID')}`,
     rating: parseFloat(hotel.rating),
-    guests: 2,
+    guests: 1,
     roomType: "Standard Room",
   }));
 
+  // Get top 3 highest rated hotels
+  const highestRatedHotels = [...hotels]
+    .sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating))
+    .slice(0, 3)
+    .map(hotel => ({
+      hotelName: hotel.nama,
+      city: hotel.lokasi,
+      image: hotel.gambar,
+      checkIn: "",
+      checkOut: "",
+      price: `Rp ${hotel.harga_per_malam.toLocaleString('id-ID')}`,
+      rating: parseFloat(hotel.rating),
+      guests: 1,
+      roomType: "Standard Room",
+    }));
+
   const handleViewDetails = (booking: any) => {
-    setSelectedBooking(booking);
+    // If booking is a hotel object (from SearchHotelsView), enrich it with description
+    if (booking.nama) {
+      const hotel = hotels.find((h: Hotel) => h.id === booking.id) || booking;
+      setSelectedBooking({
+        hotelName: hotel.nama,
+        city: hotel.lokasi,
+        image: hotel.gambar,
+        checkIn: booking.checkIn || "",
+        checkOut: booking.checkOut || "",
+        price: `Rp ${hotel.harga_per_malam.toLocaleString('id-ID')}`,
+        rating: parseFloat(hotel.rating),
+        guests: booking.guests || 1,
+        roomType: booking.roomType || "Standard Room",
+        description: hotel.deskripsi,
+      });
+    } else {
+      // For existing booking objects, try to find the hotel description
+      const hotel = hotels.find((h: Hotel) => h.nama === booking.hotelName);
+      setSelectedBooking({
+        ...booking,
+        description: hotel?.deskripsi,
+      });
+    }
     setIsModalOpen(true);
   };
 
@@ -511,8 +541,8 @@ export default function App() {
         return (
           <DashboardView
             stats={stats}
-            upcomingBookings={upcomingBookings}
-            pastBookings={pastBookings}
+            recommendations={recommendations}
+            highestRatedHotels={highestRatedHotels}
             onViewDetails={handleViewDetails}
             onBook={handleAddToCart}
             onWishlist={handleWishlist}
@@ -618,6 +648,10 @@ export default function App() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         booking={selectedBooking}
+        onManageBooking={(booking) => {
+          // Add the selected booking to cart and navigate to bookings page
+          handleAddToCart(booking);
+        }}
       />
 
       {lastPaymentDetails && (

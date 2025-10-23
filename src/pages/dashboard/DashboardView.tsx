@@ -5,8 +5,8 @@ import { Calendar, Heart, CreditCard, Clock } from "lucide-react";
 
 interface DashboardViewProps {
   stats: any[];
-  upcomingBookings: any[];
-  pastBookings: any[];
+  recommendations: any[];
+  highestRatedHotels: any[];
   onViewDetails: (booking: any) => void;
   onBook: (booking: any) => void;
   onWishlist: (hotel: any) => void;
@@ -14,8 +14,8 @@ interface DashboardViewProps {
 
 export function DashboardView({
   stats,
-  upcomingBookings,
-  pastBookings,
+  recommendations,
+  highestRatedHotels,
   onViewDetails,
   onBook,
   onWishlist,
@@ -43,16 +43,16 @@ export function DashboardView({
         </div>
       </div>
 
-      {/* Upcoming Trips */}
+      {/* Recommendations */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[#e5e7eb]">Perjalanan Mendatang</h2>
+          <h2 className="text-[#e5e7eb]">Rekomendasi</h2>
           <button className="text-[#3b82f6] hover:text-blue-400 transition-colors text-sm">
             Lihat Semua
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {upcomingBookings.map((booking, index) => (
+          {recommendations.map((booking: any, index: number) => (
             <BookingCard
               key={index}
               hotelName={booking.hotelName}
@@ -69,16 +69,16 @@ export function DashboardView({
         </div>
       </div>
 
-      {/* Past Stays */}
+      {/* Highest Rated Hotels */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[#e5e7eb]">Riwayat Menginap</h2>
+          <h2 className="text-[#e5e7eb]">Hotel Terbaik</h2>
           <button className="text-[#3b82f6] hover:text-blue-400 transition-colors text-sm">
             Lihat Semua
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {pastBookings.map((booking, index) => (
+          {highestRatedHotels.map((booking: any, index: number) => (
             <BookingCard
               key={index}
               hotelName={booking.hotelName}
@@ -87,9 +87,9 @@ export function DashboardView({
               checkIn={booking.checkIn}
               checkOut={booking.checkOut}
               price={booking.price}
-              status="past"
               onViewDetails={() => onViewDetails(booking)}
               onBook={() => onBook(booking)}
+              onWishlist={() => onWishlist(booking)}
             />
           ))}
         </div>

@@ -69,14 +69,9 @@ export function BookingCard({
       <div className="p-4">
         <h3 className="text-[#e5e7eb] mb-2">{hotelName}</h3>
 
-        <div className="flex items-center gap-2 text-gray-400 text-sm mb-1.5">
+        <div className="flex items-center gap-2 text-gray-400 text-sm mb-3">
           <MapPin className="w-4 h-4" />
           <span>{city}</span>
-        </div>
-
-        <div className="flex items-center gap-2 text-gray-400 text-sm mb-3">
-          <Calendar className="w-4 h-4" />
-          <span>{checkIn} - {checkOut}</span>
         </div>
 
         {price && (
