@@ -4,6 +4,10 @@ A modern and responsive **Hotel Reservation App** built with **TypeScript**, **R
 
 ---
 
+![Preview](/src/assets/images/Bookify.png)
+
+---
+
 ## ✨ Features
 
 - 🏠 **Browse Hotels** – View available hotels with details, images, and pricing.
